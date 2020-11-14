@@ -197,8 +197,10 @@ const resolvers = {
     addBook: async (root, args) => {
 
       let author = await Author.findOne({name: args.author})
+      let newAuthor = false
 
       if( !author ){
+        newAuthor = true
         author = new Author({
           name: args.author
         })
@@ -221,13 +223,16 @@ const resolvers = {
         await newBook.save()
       }
       catch(error){ 
+        if(newAuthor) 
+        {
+          await Author.findByIdAndDelete(author._id)
+        }
         throw new UserInputError(error.message, {
           invalidArgs: args,
         })
       }
 
       await newBook.populate('author')
-
       return newBook
     },
 
