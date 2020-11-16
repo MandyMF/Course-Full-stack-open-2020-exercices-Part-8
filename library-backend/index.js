@@ -249,7 +249,7 @@ const resolvers = {
       }
 
       const newBook = new Book({
-        ...args, author: author._id
+        ...args, author: author
       })
 
       try {
@@ -264,8 +264,7 @@ const resolvers = {
           invalidArgs: args,
         })
       }
-
-      await newBook.populate('author')
+      
       return newBook
     },
 

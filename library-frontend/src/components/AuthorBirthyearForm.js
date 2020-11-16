@@ -26,7 +26,6 @@ const AuthorBirthyearForm = ({options}) => {
 
   const handleSelectName = (selectedName) =>{
     setNameSelected(selectedName)
-    console.log(selectedName)
   }
 
   return (
