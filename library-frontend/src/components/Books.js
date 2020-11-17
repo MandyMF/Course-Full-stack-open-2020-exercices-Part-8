@@ -1,21 +1,28 @@
-import React, {useState, useEffect} from 'react'
-import { useQuery } from '@apollo/client'
+import React, { useEffect} from 'react'
+import { useQuery, useLazyQuery } from '@apollo/client'
 import {ALL_BOOKS} from '../queries'
 
 const Books = ({genre, setGenre, ...props}) => {
   
-  const {data, loading} = useQuery(ALL_BOOKS)
-
+  const {data} = useQuery(ALL_BOOKS)
+  const [getBooks, result] = useLazyQuery(ALL_BOOKS, {
+    fetchPolicy: "network-only",
+})
+  
   let genres = data?.allBooks?.flatMap(book=> {
     return book.genres
   })
   genres = [...(new Set(genres))]
+
+  useEffect(()=>{
+    getBooks({variables:{genre}})
+  }, [genre, getBooks])
   
   if (!props.show) {
     return null
   }
 
-  if (loading)
+  if (result?.loading)
   {
     return <h3>Loading Books ...</h3>
   }
@@ -35,13 +42,7 @@ const Books = ({genre, setGenre, ...props}) => {
               published
             </th>
           </tr>
-          {data.allBooks.filter(
-            book => {
-              if(genre)
-                return book.genres.includes(genre)
-              return true
-            }
-          ).map(a =>
+          {result?.data?.allBooks?.map(a =>
             <tr key={a.title}>
               <td>{a.title}</td>
               <td>{a.author.name}</td>

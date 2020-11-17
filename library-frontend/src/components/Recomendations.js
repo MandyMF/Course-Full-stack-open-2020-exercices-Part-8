@@ -1,28 +1,32 @@
-import React, {useState, useEffect} from 'react'
-import { useQuery, useLazyQuery } from '@apollo/client'
-import {ALL_BOOKS} from '../queries'
-import {USER_PREFERED_GENRE, ALL_BOOKS_BY_GENRE} from '../queries'
+import React from 'react'
+import { useQuery } from '@apollo/client'
+import {USER_PREFERED_GENRE, ALL_BOOKS} from '../queries'
 
 const Recommendations = (props) => {
   
-  const [getBooks, result] = useLazyQuery(ALL_BOOKS_BY_GENRE)
+
   const {data: user_pref_genre, loading: genre_loading} = useQuery(USER_PREFERED_GENRE)
 
 
-  useEffect(()=>{
+  const {data, loading} = useQuery(ALL_BOOKS, {variables:{  
+    genre: user_pref_genre?.me?.favoriteGenre
+  }})
+
+
+  /*useEffect(()=>{
     if(!genre_loading)
     {
       getBooks( {variables:{  
         genre: user_pref_genre.me.favoriteGenre
       }})
     }  
-  }, [genre_loading, user_pref_genre]) // eslint-disable-line
+  }, [genre_loading, user_pref_genre])*/
   
   if (!props.show) {
     return null
   }
 
-  if (result.loading || genre_loading)
+  if (loading || genre_loading)
   {
     return <h3>Loading Books ...</h3>
   }
@@ -42,7 +46,7 @@ const Recommendations = (props) => {
               published
             </th>
           </tr>
-          {result.data.allBooks
+          {data.allBooks
           .map(a =>
             <tr key={a.title}>
               <td>{a.title}</td>
