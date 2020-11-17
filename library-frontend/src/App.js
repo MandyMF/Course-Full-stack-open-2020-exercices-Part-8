@@ -11,6 +11,7 @@ const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(null)
   const client = useApolloClient()
+  const [genre, setGenre] = useState(null)
 
   const logout = () => {    
     setToken(null)    
@@ -40,10 +41,13 @@ const App = () => {
       />
 
       <Books 
+        genre={genre}
+        setGenre={setGenre}
         show={page === 'books'}
       />
 
       <NewBook
+        setGenre={setGenre}
         show={page === 'add'}
       />
 
@@ -53,7 +57,7 @@ const App = () => {
         show={page === 'login'}
       />
 
-      
+
       <Recommendations
         show={page === 'recommend'}
       />

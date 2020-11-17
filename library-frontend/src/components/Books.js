@@ -2,10 +2,9 @@ import React, {useState, useEffect} from 'react'
 import { useQuery } from '@apollo/client'
 import {ALL_BOOKS} from '../queries'
 
-const Books = (props) => {
+const Books = ({genre, setGenre, ...props}) => {
   
   const {data, loading} = useQuery(ALL_BOOKS)
-  const [genre, setGenre] = useState(null)
 
   let genres = data?.allBooks?.flatMap(book=> {
     return book.genres
