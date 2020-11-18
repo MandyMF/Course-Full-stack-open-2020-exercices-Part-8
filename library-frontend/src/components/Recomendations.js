@@ -10,17 +10,8 @@ const Recommendations = (props) => {
 
   const {data, loading} = useQuery(ALL_BOOKS, {variables:{  
     genre: user_pref_genre?.me?.favoriteGenre
-  }})
-
-
-  /*useEffect(()=>{
-    if(!genre_loading)
-    {
-      getBooks( {variables:{  
-        genre: user_pref_genre.me.favoriteGenre
-      }})
-    }  
-  }, [genre_loading, user_pref_genre])*/
+  }
+})
   
   if (!props.show) {
     return null
