@@ -2,6 +2,7 @@ import {gql} from '@apollo/client'
 
 export const BOOK_FRAGMENT = gql`
   fragment bookDetails on Book{
+    id,
     title,
     author{
       name
@@ -39,14 +40,11 @@ export const ADD_BOOK = gql`
       published: $published,
       genres: $genres
     ){
-      title,
-      author{
-        name
-      }
-      published,
-      genres
+      ...bookDetails
     }
   }
+
+  ${BOOK_FRAGMENT}
 `
 
 export const EDIT_AUTHOR = gql`
