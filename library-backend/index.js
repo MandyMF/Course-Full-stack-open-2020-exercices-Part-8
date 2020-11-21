@@ -6,6 +6,29 @@ const Author = require('./models/author')
 const User = require('./models/user')
 const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
+const DataLoader = require('dataloader')
+
+const authorBatch = (async (ids) => {
+  const authors = await Author.find({_id: {
+    $in: ids
+  }})
+
+  const books = await Book.find({}).populate('author')
+
+  const authorsExtracted = authors.map((author)=>{     
+    const bookCount = books.filter(book=> book.author.name === author.name).length
+    
+    return {
+      id: author.id,
+      bookCount
+    }
+  })
+
+  return ids.map(
+    id => authorsExtracted.find(a => a.id == id)
+  )
+
+})
 
 const MONGODB_URI ='mongodb+srv://fullstack:asd123.@cluster0.vqjhh.mongodb.net/library-app?retryWrites=true&w=majority'
 
@@ -202,22 +225,8 @@ const resolvers = {
         return Book.find({}).populate('author')
     },
 
-    allAuthors: async ()=> {
-
-      const authors = await Author.find({})
-      const books = await Book.find({}).populate('author')
-
-      return authors.map((author)=>{    
-        
-        const bookCount = books.filter(book=> book.author.name === author.name).length
-        
-        return {
-          id: author._id,
-          name: author.name,
-          born: author.born,
-          bookCount
-        }
-      })
+    allAuthors:  ()=> {
+      return Author.find({})
     },
 
     me: (root, args, context) => {
@@ -317,6 +326,12 @@ const resolvers = {
       return { value: jwt.sign(userForToken, JWT_SECRET) }
     },
   },
+  Author:{
+    bookCount: async (root, _ , { dataloader } ) => {
+      const value = await dataloader.load(root._id)
+      return value.bookCount
+    }
+  },
   Subscription: {
     bookAdded:{
       subscribe: () => {
@@ -337,8 +352,14 @@ const server = new ApolloServer({
         auth.substring(7), JWT_SECRET      
         )      
         const currentUser = await User.findById(decodedToken.id)     
-        return { currentUser }    
+        return { 
+          currentUser,
+          dataloader: new DataLoader(keys => authorBatch(keys))
+        }    
       }
+      return { 
+        dataloader: new DataLoader(keys => authorBatch(keys))
+      }   
   }
 })
 
